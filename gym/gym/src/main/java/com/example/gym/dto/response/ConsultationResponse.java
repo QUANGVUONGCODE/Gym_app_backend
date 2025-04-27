@@ -1,0 +1,35 @@
+package com.example.gym.dto.response;
+
+import java.time.LocalDate;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.FieldDefaults;
+
+@Getter
+@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class ConsultationResponse {
+    Long id;
+
+    @JsonProperty("user_id")
+    Long userId;
+
+    @JsonProperty("trainer_id")
+    Long trainerId;
+
+    @JsonProperty("date")
+    LocalDate date;
+
+    @JsonProperty("message")
+    String message;
+}
