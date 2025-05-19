@@ -1,5 +1,5 @@
 # Sử dụng image OpenJDK 17 (phù hợp với Spring Boot)
-FROM openjdk:17-jdk-slim
+FROM openjdk:21-jdk-slim
 
 # Tạo thư mục làm việc trong container
 WORKDIR /app
