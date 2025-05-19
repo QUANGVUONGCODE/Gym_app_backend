@@ -1,8 +1,7 @@
-package com.example.gym.dto.response;
+package com.example.gym.dto.response.responseImage;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,21 +10,19 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 @Getter
-@Setter
 @Builder
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
-public class TrainerResponse {
+@FieldDefaults(level = lombok.AccessLevel.PRIVATE)
+public class UserImageResponse {
 
     Long id;
 
-    @JsonProperty("name")
-    String name;
+    @JsonProperty("user_id")
+    Long userId;
 
-    @JsonProperty("specialization")
-    String specialization;
+    @JsonProperty("image_url")
+    String url;
 
-    @JsonProperty("info")
-    String info;
 }

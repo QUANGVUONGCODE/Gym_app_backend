@@ -1,7 +1,5 @@
 package com.example.gym.entity;
 
-import java.time.LocalDate;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -18,15 +16,16 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
-@Table(name = "consultation")
 @Entity
+@Table(name = "user_image")
 @Getter
-@Builder
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Consultation {
+public class UserImage {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
@@ -35,13 +34,6 @@ public class Consultation {
     @JoinColumn(name = "user_id")
     User user;
 
-    @ManyToOne
-    @JoinColumn(name = "trainer_id")
-    Trainer trainer;
-
-    @Column(name = "date")
-    LocalDate date;
-
-    @Column(name = "message")
-    String message;
+    @Column(name = "image_url", length = 300)
+    String url;
 }

@@ -34,7 +34,7 @@ public class HealthDataService {
     public HealthDataResponse createHealthData(HealthDataRequest healthDataRequest) {
         Long userId = healthDataRequest.getUserId();
         LocalDate today = LocalDate.now();
-        if (healthDataRepository.findByUserIdAndDate(userId, today).isPresent()) {
+        if (healthDataRepository.findByUserIdAndDate(userId, today).isEmpty()) {
             throw new AppException(ErrorCode.HEALTH_DATA_EXISTS);
         }
         User user = userRepository.findById(userId)
@@ -80,19 +80,20 @@ public class HealthDataService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        // Check for null or empty date string
         LocalDate targetDate = StringUtils.hasText(date) ? LocalDate.parse(date) : LocalDate.now();
 
-        // If date is provided but period is the default "today", treat it as "day"
-        if (StringUtils.hasText(date) && "today".equalsIgnoreCase(period)) {
-            period = "day";
-        }
-
+        // Nếu "today", lấy dữ liệu sức khỏe của người dùng cho ngày đó
         if ("today".equalsIgnoreCase(period)) {
-            return healthDataRepository.findByUserIdAndDate(userId, targetDate)
-                    .map(healthDataMapper::toHealthDataResponse)
-                    .orElse(null);
-        } else if ("week".equalsIgnoreCase(period)) {
+            List<HealthData> healthDataList = healthDataRepository.findByUserIdAndDate(userId, targetDate);
+            if (healthDataList.isEmpty()) {
+                return null;
+            }
+            // Xử lý trường hợp có nhiều kết quả, lấy bản ghi mới nhất
+            HealthData latestData = healthDataList.get(0); // Có thể sắp xếp nếu cần
+            return healthDataMapper.toHealthDataResponse(latestData);
+        }
+        // Nếu "week", lấy dữ liệu tuần của người dùng
+        else if ("week".equalsIgnoreCase(period)) {
             LocalDate startOfWeek = targetDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
             LocalDate endOfWeek = startOfWeek.plusDays(6);
             List<HealthData> weeklyData = healthDataRepository.findByUserIdAndDateBetween(userId, startOfWeek,
@@ -101,7 +102,9 @@ public class HealthDataService {
                 return null;
             }
             return aggregateWeeklyData(weeklyData);
-        } else if ("month".equalsIgnoreCase(period)) {
+        }
+        // Nếu "month", lấy dữ liệu của tháng của người dùng
+        else if ("month".equalsIgnoreCase(period)) {
             LocalDate startOfMonth = targetDate.withDayOfMonth(1);
             LocalDate endOfMonth = targetDate.withDayOfMonth(targetDate.lengthOfMonth());
             List<HealthData> monthlyData = healthDataRepository.findByUserIdAndDateBetween(userId, startOfMonth,
@@ -110,15 +113,19 @@ public class HealthDataService {
                 return null;
             }
             return aggregateMonthlyData(monthlyData);
-        } else if ("day".equalsIgnoreCase(period)) {
-            return healthDataRepository.findByUserIdAndDate(userId, targetDate)
-                    .map(healthDataMapper::toHealthDataResponse)
-                    .orElse(null);
-        } else {
+        }
+        // Các điều kiện khác như day
+        else {
             throw new AppException(ErrorCode.INVALID_PERIOD);
         }
     }
 
+    // Tổng hợp dữ liệu theo tháng
+    private HealthDataResponse aggregateMonthlyData(List<HealthData> monthlyData) {
+        return aggregateWeeklyData(monthlyData); // Đơn giản hóa bằng cách dùng hàm tổng hợp tuần
+    }
+
+    // Tổng hợp dữ liệu tuần
     private HealthDataResponse aggregateWeeklyData(List<HealthData> weeklyData) {
         float totalWalk = 0;
         float totalCalories = 0;
@@ -143,10 +150,7 @@ public class HealthDataService {
         return healthDataMapper.toHealthDataResponse(aggregatedData);
     }
 
-    private HealthDataResponse aggregateMonthlyData(List<HealthData> monthlyData) {
-        return aggregateWeeklyData(monthlyData);
-    }
-
+    // Chuyển đổi thời gian ngủ sang phút
     private int parseSleepToMinutes(String sleep) {
         if (sleep == null || sleep.isEmpty())
             return 0;
@@ -156,6 +160,7 @@ public class HealthDataService {
         return hours * 60 + minutes;
     }
 
+    // Chuyển phút thành thời gian ngủ
     private String formatMinutesToSleep(int totalMinutes) {
         int hours = totalMinutes / 60;
         int minutes = totalMinutes % 60;

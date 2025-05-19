@@ -37,18 +37,8 @@ public class MapperConfiguration {
     }
 
     @Bean
-    public TrainerMapper trainerMapper() {
-        return Mappers.getMapper(TrainerMapper.class);
-    }
-
-    @Bean
     public UserMapper userMapper() {
         return Mappers.getMapper(UserMapper.class);
-    }
-
-    @Bean
-    public ConsultationMapper consultationMapper() {
-        return Mappers.getMapper(ConsultationMapper.class);
     }
 
     @Bean
