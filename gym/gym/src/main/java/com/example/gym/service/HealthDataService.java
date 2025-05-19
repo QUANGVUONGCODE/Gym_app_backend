@@ -49,8 +49,10 @@ public class HealthDataService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        HealthData healthData = healthDataRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new AppException(ErrorCode.HEALTH_DATA_NOT_FOUND));
+        HealthData healthData = healthDataRepository.findByUserId(userId);
+        if (healthData == null) {
+            throw new AppException(ErrorCode.HEALTH_DATA_NOT_FOUND);
+        }
 
         return healthDataMapper.toHealthDataResponse(healthData);
     }
